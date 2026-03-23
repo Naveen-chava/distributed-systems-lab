@@ -25,7 +25,8 @@ The consumer is built with a **Two-Phase Startup**:
 
 ### Build and Start
 ```bash
-docker compose up --build
+docker compose build
+docker compose up
 ```
 
 ### Observe the Flow
