@@ -1,0 +1,47 @@
+# docker compose up --build
+
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  producer:
+    build: .
+    command: ["./producer"]
+    restart: "no"
+    environment:
+      - REDIS_URL=redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  consumer-1:
+    build: .
+    command: ["./consumer"]
+    restart: on-failure
+    environment:
+      - REDIS_URL=redis:6379
+      - CONSUMER_NAME=consumer-1
+      - CRASH_AFTER_MESSAGES=5
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  consumer-2:
+    build: .
+    command: ["./consumer"]
+    restart: on-failure
+    environment:
+      - REDIS_URL=redis:6379
+      - CONSUMER_NAME=consumer-2
+    depends_on:
+      redis:
+        condition: service_healthy
